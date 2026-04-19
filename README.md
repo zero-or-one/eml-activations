@@ -86,7 +86,7 @@ The grammar is `S → 1 | eml(S, S)`. Every elementary expression becomes a bina
 
 ## Experiments
 
-- [MNIST with LearnableEML](experiments/mnist_results.md) — a two-layer MLP where each hidden layer learns its own activation shape from the `exp`/`log` family. Includes comparison against ReLU.
+- [MNIST with LearnableEML](experiments/results/mnist_leml.md) — a two-layer MLP where each hidden layer learns its own activation shape from the `exp`/`log` family. Includes comparison against ReLU.
 
 ## References
 

@@ -77,5 +77,5 @@ The value of LearnableEML is not in beating ReLU on toy benchmarks but in:
 ```bash
 pip install -e .
 pip install torchvision
-python examples/mnist_leml.py
+python experiments/mnist_leml.py
 ```
