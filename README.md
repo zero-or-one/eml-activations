@@ -84,6 +84,10 @@ The grammar is `S → 1 | eml(S, S)`. Every elementary expression becomes a bina
   1     x           ← ln(x) = eml(1, eml(eml(1,x), 1))
 ```
 
+## Experiments
+
+- [MNIST with LearnableEML](experiments/mnist_results.md) — a two-layer MLP where each hidden layer learns its own activation shape from the `exp`/`log` family. Includes comparison against ReLU.
+
 ## References
 
 - Odrzywołek, A. (2026). *All elementary functions from a single binary operator.* [arXiv:2603.21852](https://arxiv.org/abs/2603.21852)
