@@ -20,6 +20,7 @@ from .core import (
     EML,
     EMLExp,
     EMLSigmoid,
+    LearnableEML,
 )
 from .tree import EMLTree, EMLNode, EMLLeaf
 
@@ -40,6 +41,7 @@ __all__ = [
     "EML",
     "EMLExp",
     "EMLSigmoid",
+    "LearnableEML",
     "EMLTree",
     "EMLNode",
     "EMLLeaf",

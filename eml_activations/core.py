@@ -111,3 +111,29 @@ class EMLSigmoid(nn.Module):
     """Sigmoid built from EML primitives."""
     def forward(self, x: Tensor) -> Tensor:
         return eml_sigmoid(x)
+
+
+class LearnableEML(nn.Module):
+    """Parametric activation: f(x) = exp(ax + b) - ln(cx + d).
+
+    Learnable (a, b, c, d) let gradient descent discover which member of
+    the exp/log activation family best fits the task.  Special cases:
+
+        a=1, b=0, c→0⁺, d=1  →  exp(x)
+        a=0, b=0, c=1,  d=0  →  -ln(x)
+        a=1, b=0, c=1,  d=0  →  eml(x, x) = exp(x) - ln(x)
+
+    The right-hand input is clamped to (ε, ∞) for numerical safety.
+    """
+
+    def __init__(self, a: float = 1.0, b: float = 0.0,
+                 c: float = 0.0, d: float = 1.0) -> None:
+        super().__init__()
+        self.a = nn.Parameter(torch.tensor(a))
+        self.b = nn.Parameter(torch.tensor(b))
+        self.c = nn.Parameter(torch.tensor(c))
+        self.d = nn.Parameter(torch.tensor(d))
+
+    def forward(self, x: Tensor) -> Tensor:
+        return eml(self.a * x + self.b,
+                    torch.clamp(self.c * x + self.d, min=1e-7))
