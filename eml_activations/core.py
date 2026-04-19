@@ -135,5 +135,6 @@ class LearnableEML(nn.Module):
         self.d = nn.Parameter(torch.tensor(d))
 
     def forward(self, x: Tensor) -> Tensor:
-        return eml(self.a * x + self.b,
-                    torch.clamp(self.c * x + self.d, min=1e-7))
+        left = torch.clamp(self.a * x + self.b, -20.0, 20.0)
+        right = torch.clamp(self.c * x + self.d, min=1e-7)
+        return eml(left, right)
