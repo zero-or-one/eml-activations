@@ -25,8 +25,12 @@ class EMLLeaf(nn.Module):
         super().__init__()
         self.logits = nn.Parameter(torch.randn(2))  # [α_1, β_x]
 
-    def forward(self, x: Tensor, *, tau: float = 1.0) -> Tensor:
-        w = F.gumbel_softmax(self.logits.expand(x.shape[0], -1), tau=tau, hard=False)
+    def forward(self, x: Tensor, *, tau: float = 1.0, gumbel: bool = True) -> Tensor:
+        logits = self.logits.expand(x.shape[0], -1)
+        if gumbel:
+            w = F.gumbel_softmax(logits, tau=tau, hard=False)
+        else:
+            w = F.softmax(logits / tau, dim=-1)
         return w[:, 0] * 1.0 + w[:, 1] * x
 
 
@@ -43,15 +47,19 @@ class EMLNode(nn.Module):
         self.left_logits = nn.Parameter(torch.randn(3))   # [1, x, child]
         self.right_logits = nn.Parameter(torch.randn(3))
 
-    def _select(self, logits: nn.Parameter, x: Tensor, child: Tensor, tau: float) -> Tensor:
-        w = F.gumbel_softmax(logits.expand(x.shape[0], -1), tau=tau, hard=False)
+    def _select(self, logits: nn.Parameter, x: Tensor, child: Tensor, tau: float, gumbel: bool) -> Tensor:
+        l = logits.expand(x.shape[0], -1)
+        if gumbel:
+            w = F.gumbel_softmax(l, tau=tau, hard=False)
+        else:
+            w = F.softmax(l / tau, dim=-1)
         return w[:, 0] * 1.0 + w[:, 1] * x + w[:, 2] * child
 
-    def forward(self, x: Tensor, *, tau: float = 1.0) -> Tensor:
-        lc = self.left_child(x, tau=tau)
-        rc = self.right_child(x, tau=tau)
-        left_in = self._select(self.left_logits, x, lc, tau)
-        right_in = self._select(self.right_logits, x, rc, tau)
+    def forward(self, x: Tensor, *, tau: float = 1.0, gumbel: bool = True) -> Tensor:
+        lc = self.left_child(x, tau=tau, gumbel=gumbel)
+        rc = self.right_child(x, tau=tau, gumbel=gumbel)
+        left_in = self._select(self.left_logits, x, lc, tau, gumbel)
+        right_in = self._select(self.right_logits, x, rc, tau, gumbel)
         # clamp to avoid exp overflow / log-of-negative
         left_in = torch.clamp(left_in, -20.0, 20.0)
         right_in = torch.clamp(right_in, 1e-12, None)
@@ -80,10 +88,10 @@ class EMLTree(nn.Module):
             return EMLLeaf()
         return EMLNode(self._build(d - 1), self._build(d - 1))
 
-    def forward(self, x: Tensor, *, tau: float = 1.0) -> Tensor:
+    def forward(self, x: Tensor, *, tau: float = 1.0, gumbel: bool = True) -> Tensor:
         if x.dim() == 0:
             x = x.unsqueeze(0)
-        return self.root(x, tau=tau)
+        return self.root(x, tau=tau, gumbel=gumbel)
 
     def snap_weights(self) -> None:
         """Snap all logits to one-hot (hard selection of 1, x, or child)."""

@@ -87,6 +87,7 @@ The grammar is `S → 1 | eml(S, S)`. Every elementary expression becomes a bina
 ## Experiments
 
 - [MNIST with LearnableEML](experiments/results/mnist_leml.md) — a two-layer MLP where each hidden layer learns its own activation shape from the `exp`/`log` family. Includes comparison against ReLU.
+- [Symbolic Regression](experiments/results/symbolic_regression.md) — discovering closed-form expressions (`exp`, `ln`, `sqrt`, `x²`) from data using EMLTree. Demonstrates the "NAND gate for continuous math" idea.
 
 ## References
 
